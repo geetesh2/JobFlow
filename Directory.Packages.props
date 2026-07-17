@@ -1,0 +1,41 @@
+<Project>
+
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <ItemGroup>
+
+    <!-- EF Core -->
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.1" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.1" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+
+    <!-- ASP.NET -->
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.1" />
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.1" />
+
+    <!-- Worker -->
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.1" />
+
+    <!-- Swagger -->
+    <PackageVersion Include="Swashbuckle.AspNetCore" Version="7.3.1" />
+
+    <!-- Validation -->
+    <PackageVersion Include="FluentValidation.AspNetCore" Version="11.3.1" />
+
+    <!-- MediatR -->
+    <PackageVersion Include="MediatR" Version="13.1.0" />
+
+    <!-- Logging -->
+    <PackageVersion Include="Serilog.AspNetCore" Version="9.0.0" />
+
+    <!-- Testing -->
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.4" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.2" />
+
+  </ItemGroup>
+
+</Project>

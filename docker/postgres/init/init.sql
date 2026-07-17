@@ -1,0 +1,3 @@
+CREATE DATABASE "JobFlowDb";
+
+CREATE DATABASE "KeycloakDb";

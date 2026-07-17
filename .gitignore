@@ -1,0 +1,31 @@
+# Build
+bin/
+obj/
+
+# Rider
+.idea/
+
+# Visual Studio
+.vs/
+
+# VS Code
+.vscode/
+
+# User-specific files
+*.user
+*.suo
+
+# Logs
+*.log
+
+# Environment
+.env
+
+# Test Results
+TestResults/
+
+# Coverage
+coverage/
+
+# macOS
+.DS_Store

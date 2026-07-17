@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-JobFlow.Worker-cb21b98f-d537-44a7-a1fa-c5dd0b9e42ef</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\JobFlow.Application\JobFlow.Application.csproj" />
+    <ProjectReference Include="..\JobFlow.Infrastructure\JobFlow.Infrastructure.csproj" />
+    <ProjectReference Include="..\JobFlow.Contracts\JobFlow.Contracts.csproj" />
+    <ProjectReference Include="..\JobFlow.Shared\JobFlow.Shared.csproj" />
+  </ItemGroup>
+</Project>
