@@ -15,7 +15,6 @@ public sealed class TestJobSearchService : IJobSearchService
     public Task<JobSearchResult> SearchJobsAsync(JobSearchRequest request, CancellationToken cancellationToken = default)
     {
         var jobs = _jobService.GetAll();
-        Console.WriteLine($"[TestJobSearchService] Returning {jobs.Count} jobs for query '{request.Query}' status '{request.Status}'");
         var result = new JobSearchResult(jobs, request.Page, request.PageSize, jobs.Count);
         return Task.FromResult(result);
     }

@@ -18,7 +18,6 @@ public sealed class TestJobService : IJobService, ITestJobStore
         var now = DateTime.UtcNow;
         var resp = new JobResponse(Guid.NewGuid(), request.Name, "Pending", now, now);
         _store[resp.Id] = resp;
-        Console.WriteLine($"[TestJobService] Created job {resp.Id} {resp.Name}");
         return Task.FromResult(resp);
     }
 
