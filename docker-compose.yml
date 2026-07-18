@@ -6,8 +6,8 @@ services:
     restart: unless-stopped
 
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
 
     ports:
       - "5432:5432"
@@ -17,7 +17,7 @@ services:
       - ./docker/postgres/init:/docker-entrypoint-initdb.d
 
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -47,13 +47,13 @@ services:
 
       KC_DB_URL_DATABASE: KeycloakDb
 
-      KC_DB_USERNAME: postgres
+      KC_DB_USERNAME: ${POSTGRES_USER:?Set POSTGRES_USER in .env}
 
-      KC_DB_PASSWORD: postgres
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
 
-      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:?Set KEYCLOAK_ADMIN in .env}
 
-      KEYCLOAK_ADMIN_PASSWORD: admin
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?Set KEYCLOAK_ADMIN_PASSWORD in .env}
 
     ports:
       - "8080:8080"

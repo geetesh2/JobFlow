@@ -12,11 +12,15 @@ public sealed class JobConfiguration : IEntityTypeConfiguration<Job>
 
         builder.HasKey(x => x.Id);
 
+        builder.Property(x => x.Id)
+            .ValueGeneratedNever();
+
         builder.Property(x => x.Name)
             .IsRequired()
             .HasMaxLength(200);
 
         builder.Property(x => x.Status)
+            .HasConversion<int>()
             .IsRequired();
 
         builder.Property(x => x.CreatedAtUtc)
@@ -24,5 +28,7 @@ public sealed class JobConfiguration : IEntityTypeConfiguration<Job>
 
         builder.Property(x => x.UpdatedAtUtc)
             .IsRequired();
+
+        builder.Ignore(x => x.DomainEvents);
     }
 }
