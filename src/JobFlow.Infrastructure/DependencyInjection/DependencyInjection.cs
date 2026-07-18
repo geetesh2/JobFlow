@@ -3,6 +3,7 @@ using JobFlow.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 
 namespace JobFlow.Infrastructure.DependencyInjection;
 
@@ -14,6 +15,19 @@ public static class DependencyInjection
     {
         var connectionString = configuration.GetConnectionString("JobFlowDb")
             ?? throw new InvalidOperationException("Connection string 'JobFlowDb' was not found.");
+
+        var databasePassword = configuration["Database:Password"]
+            ?? configuration["POSTGRES_PASSWORD"];
+
+        if (!string.IsNullOrWhiteSpace(databasePassword))
+        {
+            var connectionStringBuilder = new NpgsqlConnectionStringBuilder(connectionString)
+            {
+                Password = databasePassword
+            };
+
+            connectionString = connectionStringBuilder.ConnectionString;
+        }
 
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(connectionString));

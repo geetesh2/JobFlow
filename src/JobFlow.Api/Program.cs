@@ -1,31 +1,53 @@
 using JobFlow.Infrastructure.DependencyInjection;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using JobFlow.Api.Authentication;
+using JobFlow.Api.Endpoints;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddOpenApi();
-builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
     {
-        options.Authority = builder.Configuration["Authentication:Authority"]
-            ?? throw new InvalidOperationException("Authentication authority was not configured.");
-        options.Audience = builder.Configuration["Authentication:Audience"]
-            ?? throw new InvalidOperationException("Authentication audience was not configured.");
-        options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
+        Title = "JobFlow API",
+        Version = "v1"
     });
-builder.Services.AddAuthorization();
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter a Keycloak access token."
+    });
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        [new OpenApiSecurityScheme
+        {
+            Reference = new OpenApiReference
+            {
+                Type = ReferenceType.SecurityScheme,
+                Id = "Bearer"
+            }
+        }] = []
+    });
+});
+builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddKeycloakAuthentication(builder.Configuration, builder.Environment);
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.MapOpenApi();
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "JobFlow API v1");
+});
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapIdentityEndpoints();
 
 app.Run();

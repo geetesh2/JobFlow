@@ -1,6 +1,7 @@
 @JobFlow.Api_HostAddress = http://localhost:5274
 
-GET {{JobFlow.Api_HostAddress}}/weatherforecast/
+GET {{JobFlow.Api_HostAddress}}/api/v1/identity/me
 Accept: application/json
+Authorization: Bearer {{accessToken}}
 
 ###

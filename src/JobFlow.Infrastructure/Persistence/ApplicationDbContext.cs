@@ -41,13 +41,13 @@ public sealed class ApplicationDbContext
         {
             if (entry.State == EntityState.Added)
             {
-                entry.Entity.CreatedAtUtc = utcNow;
-                entry.Entity.UpdatedAtUtc = utcNow;
+                entry.Entity.SetCreatedAtUtc(utcNow);
+                entry.Entity.SetUpdatedAtUtc(utcNow);
             }
 
             if (entry.State == EntityState.Modified)
             {
-                entry.Entity.UpdatedAtUtc = utcNow;
+                entry.Entity.SetUpdatedAtUtc(utcNow);
             }
         }
     }

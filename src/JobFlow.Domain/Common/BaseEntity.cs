@@ -12,6 +12,16 @@ public abstract class BaseEntity<TId>
 
     public DateTime UpdatedAtUtc { get; protected set; }
 
+    public void SetCreatedAtUtc(DateTime createdAtUtc)
+    {
+        CreatedAtUtc = createdAtUtc;
+    }
+
+    public void SetUpdatedAtUtc(DateTime updatedAtUtc)
+    {
+        UpdatedAtUtc = updatedAtUtc;
+    }
+
     public IReadOnlyCollection<IDomainEvent> DomainEvents =>
         _domainEvents.AsReadOnly();
 
