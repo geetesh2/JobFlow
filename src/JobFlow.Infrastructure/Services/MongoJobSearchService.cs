@@ -24,7 +24,7 @@ public sealed class ElasticJobSearchService : IJobSearchService
             query &= new QueryStringQuery
             {
                 Query = request.Query,
-                Fields = Infer.Fields<JobDocument>(f => f.Name, f => f.Payload, f => f.Metadata),
+                Fields = Infer.Fields<JobDocument>(f => f.Name, f => f.Payload),
                 DefaultOperator = Operator.And
             };
         }

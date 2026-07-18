@@ -40,14 +40,17 @@ builder.Services.AddKeycloakAuthentication(builder.Configuration, builder.Enviro
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+if (!app.Configuration.GetValue("Test:SkipExternalInitializers", false))
 {
-    var serviceProvider = scope.ServiceProvider;
-    var mongoInitializer = serviceProvider.GetRequiredService<MongoDbIndexInitializer>();
-    var elasticInitializer = serviceProvider.GetRequiredService<ElasticsearchIndexInitializer>();
+    using (var scope = app.Services.CreateScope())
+    {
+        var serviceProvider = scope.ServiceProvider;
+        var mongoInitializer = serviceProvider.GetRequiredService<MongoDbIndexInitializer>();
+        var elasticInitializer = serviceProvider.GetRequiredService<ElasticsearchIndexInitializer>();
 
-    await mongoInitializer.InitializeAsync();
-    await elasticInitializer.InitializeAsync();
+        await mongoInitializer.InitializeAsync();
+        await elasticInitializer.InitializeAsync();
+    }
 }
 
 app.UseSwagger();

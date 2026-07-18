@@ -29,8 +29,9 @@ public static class JobEndpoints
         .RequireAuthorization(JobFlowPolicies.UserAccess)
         .WithName("GetJob");
 
-        jobs.MapGet("", async (JobSearchRequest request, IJobSearchService searchService) =>
+        jobs.MapGet("", async (IJobSearchService searchService, string? query, string? status, DateTime? createdAfterUtc, DateTime? createdBeforeUtc, int page = 1, int pageSize = 20, string sortBy = "CreatedAtUtc", string sortOrder = "desc") =>
         {
+            var request = new JobSearchRequest(query, status, createdAfterUtc, createdBeforeUtc, page, pageSize, sortBy, sortOrder);
             var result = await searchService.SearchJobsAsync(request);
             return Results.Ok(result);
         })
