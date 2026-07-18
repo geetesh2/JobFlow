@@ -1,6 +1,7 @@
 using JobFlow.Infrastructure.DependencyInjection;
 using JobFlow.Api.Authentication;
 using JobFlow.Api.Endpoints;
+using JobFlow.Infrastructure.Services;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -39,6 +40,16 @@ builder.Services.AddKeycloakAuthentication(builder.Configuration, builder.Enviro
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var serviceProvider = scope.ServiceProvider;
+    var mongoInitializer = serviceProvider.GetRequiredService<MongoDbIndexInitializer>();
+    var elasticInitializer = serviceProvider.GetRequiredService<ElasticsearchIndexInitializer>();
+
+    await mongoInitializer.InitializeAsync();
+    await elasticInitializer.InitializeAsync();
+}
+
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
@@ -51,4 +62,6 @@ app.UseAuthorization();
 app.MapIdentityEndpoints();
 app.MapJobEndpoints();
 
-app.Run();
+await app.RunAsync();
+
+public partial class Program { }

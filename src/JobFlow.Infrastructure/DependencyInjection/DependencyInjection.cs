@@ -5,6 +5,8 @@ using JobFlow.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver;
+using Nest;
 using Npgsql;
 using RabbitMQ.Client;
 
@@ -43,6 +45,28 @@ public static class DependencyInjection
             options.Configuration = configuration.GetValue("Redis:Configuration", "localhost:6379");
             options.InstanceName = configuration.GetValue("Redis:InstanceName", "JobFlow:");
         });
+
+        services.AddSingleton<IMongoClient>(provider =>
+        {
+            var connectionString = configuration.GetValue("MongoDb:ConnectionString", "mongodb://localhost:27017");
+            return new MongoClient(connectionString);
+        });
+
+        services.AddSingleton<IElasticClient>(provider =>
+        {
+            var url = configuration.GetValue("Elasticsearch:Url", "http://localhost:9200");
+            var settings = new ConnectionSettings(new Uri(url))
+                .DefaultIndex(configuration.GetValue("Elasticsearch:DefaultIndex", "jobflow-jobs"));
+
+            return new ElasticClient(settings);
+        });
+
+        services.AddScoped<IJobSearchService, ElasticJobSearchService>();
+        services.AddScoped<MongoJobSynchronizer>();
+        services.AddScoped<MongoDbIndexInitializer>();
+        services.AddScoped<ElasticsearchIndexInitializer>();
+        services.AddScoped<ElasticJobIndexer>();
+        services.AddScoped<WorkerJobStatusUpdater>();
 
         var rabbitMqConfig = configuration.GetSection("RabbitMq");
         var rabbitConnectionFactory = new ConnectionFactory

@@ -29,6 +29,14 @@ public static class JobEndpoints
         .RequireAuthorization(JobFlowPolicies.UserAccess)
         .WithName("GetJob");
 
+        jobs.MapGet("", async (JobSearchRequest request, IJobSearchService searchService) =>
+        {
+            var result = await searchService.SearchJobsAsync(request);
+            return Results.Ok(result);
+        })
+        .RequireAuthorization(JobFlowPolicies.UserAccess)
+        .WithName("SearchJobs");
+
         return endpoints;
     }
 }

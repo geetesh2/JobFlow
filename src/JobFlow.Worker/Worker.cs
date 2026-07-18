@@ -1,6 +1,8 @@
 using System.Text.Json;
 using JobFlow.Application.Abstractions.Persistence;
 using JobFlow.Contracts.Messages;
+using JobFlow.Domain.Enums;
+using JobFlow.Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -55,8 +57,9 @@ public class Worker : BackgroundService
                 return;
             }
 
-            using var scope = _serviceScopeFactory.CreateScope();
+                using var scope = _serviceScopeFactory.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
+            var statusUpdater = scope.ServiceProvider.GetRequiredService<WorkerJobStatusUpdater>();
 
             var job = await dbContext.Jobs.FindAsync(new object[] { jobMessage.JobId }, cancellationToken);
 
@@ -70,13 +73,26 @@ public class Worker : BackgroundService
                 return;
             }
 
+            var jobDocument = await statusUpdater.GetJobAsync(jobMessage.JobId, cancellationToken);
+            if (jobDocument is not null)
+            {
+                _logger.LogInformation("Loaded job payload for processing: {JobId} payload={Payload}", jobMessage.JobId, jobDocument.Payload);
+            }
+            else
+            {
+                _logger.LogInformation("No MongoDB job document found for {JobId}; processing SQL job record only.", jobMessage.JobId);
+            }
+
             job.MarkAsProcessing();
             await dbContext.SaveChangesAsync(cancellationToken);
+            await statusUpdater.UpdateStatusAsync(jobMessage.JobId, JobStatus.Processing, DateTime.UtcNow, cancellationToken);
 
             _logger.LogInformation("Processing job {JobId} ({Name})", job.Id, job.Name);
             await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
+
             job.MarkAsCompleted();
             await dbContext.SaveChangesAsync(cancellationToken);
+            await statusUpdater.UpdateStatusAsync(jobMessage.JobId, JobStatus.Completed, DateTime.UtcNow, cancellationToken);
 
             if (_channel is not null)
             {
