@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\JobFlow.Domain\JobFlow.Domain.csproj" />
+    <ProjectReference Include="..\JobFlow.Contracts\JobFlow.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

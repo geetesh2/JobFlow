@@ -1,23 +1,109 @@
+using System.Text.Json;
+using JobFlow.Application.Abstractions.Persistence;
+using JobFlow.Contracts.Messages;
+using Microsoft.Extensions.DependencyInjection;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
+
 namespace JobFlow.Worker;
 
 public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+    private readonly IConnection _rabbitConnection;
+    private IChannel? _channel;
 
-    public Worker(ILogger<Worker> logger)
+    public Worker(
+        ILogger<Worker> logger,
+        IServiceScopeFactory serviceScopeFactory,
+        IConnection rabbitConnection)
     {
         _logger = logger;
+        _serviceScopeFactory = serviceScopeFactory;
+        _rabbitConnection = rabbitConnection;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        while (!stoppingToken.IsCancellationRequested)
+        _channel = await _rabbitConnection.CreateChannelAsync(new CreateChannelOptions(false, false, null, 0), stoppingToken);
+        await _channel.ExchangeDeclareAsync("jobflow.exchange", ExchangeType.Direct, durable: true, autoDelete: false, arguments: null, passive: false, noWait: false, cancellationToken: stoppingToken);
+        await _channel.QueueDeclareAsync("jobflow.job-created", durable: true, exclusive: false, autoDelete: false, arguments: null, passive: false, noWait: false, cancellationToken: stoppingToken);
+        await _channel.QueueBindAsync("jobflow.job-created", "jobflow.exchange", "job.created", arguments: null, noWait: false, cancellationToken: stoppingToken);
+
+        var consumer = new AsyncEventingBasicConsumer(_channel);
+        consumer.ReceivedAsync += async (_, ea) => await HandleMessageAsync(ea, stoppingToken);
+
+        await _channel.BasicConsumeAsync("jobflow.job-created", autoAck: false, consumer: consumer, cancellationToken: stoppingToken);
+        _logger.LogInformation("Worker started and listening for job.created messages.");
+    }
+
+    private async Task HandleMessageAsync(BasicDeliverEventArgs message, CancellationToken cancellationToken)
+    {
+        try
         {
-            if (_logger.IsEnabled(LogLevel.Information))
+            var body = message.Body.ToArray();
+            var jobMessage = JsonSerializer.Deserialize<JobCreatedMessage>(body);
+
+            if (jobMessage is null)
             {
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                _logger.LogWarning("Received invalid job created message payload.");
+                if (_channel is not null)
+                {
+                    await _channel.BasicNackAsync(message.DeliveryTag, multiple: false, requeue: false, cancellationToken: cancellationToken);
+                }
+                return;
             }
-            await Task.Delay(1000, stoppingToken);
+
+            using var scope = _serviceScopeFactory.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
+
+            var job = await dbContext.Jobs.FindAsync(new object[] { jobMessage.JobId }, cancellationToken);
+
+            if (job is null)
+            {
+                _logger.LogWarning("Job {JobId} not found while processing message.", jobMessage.JobId);
+                if (_channel is not null)
+                {
+                    await _channel.BasicNackAsync(message.DeliveryTag, multiple: false, requeue: false, cancellationToken: cancellationToken);
+                }
+                return;
+            }
+
+            job.MarkAsProcessing();
+            await dbContext.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Processing job {JobId} ({Name})", job.Id, job.Name);
+            await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
+            job.MarkAsCompleted();
+            await dbContext.SaveChangesAsync(cancellationToken);
+
+            if (_channel is not null)
+            {
+                await _channel.BasicAckAsync(message.DeliveryTag, multiple: false, cancellationToken: cancellationToken);
+            }
+            _logger.LogInformation("Job {JobId} completed.", job.Id);
         }
+        catch (OperationCanceledException)
+        {
+            if (_channel is not null)
+            {
+                await _channel.BasicNackAsync(message.DeliveryTag, multiple: false, requeue: true, cancellationToken: cancellationToken);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to process job message.");
+            if (_channel is not null)
+            {
+                await _channel.BasicNackAsync(message.DeliveryTag, multiple: false, requeue: true, cancellationToken: cancellationToken);
+            }
+        }
+    }
+
+    public override void Dispose()
+    {
+        _channel?.Dispose();
+        base.Dispose();
     }
 }
