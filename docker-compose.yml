@@ -27,7 +27,6 @@ services:
     keycloak:
         image: quay.io/keycloak/keycloak:26.2
         container_name: jobflow-keycloak
-
         restart: unless-stopped
 
         command:
@@ -40,17 +39,11 @@ services:
 
         environment:
             KC_DB: postgres
-
             KC_DB_URL_HOST: postgres
-
             KC_DB_URL_DATABASE: KeycloakDb
-
             KC_DB_USERNAME: ${POSTGRES_USER:?Set POSTGRES_USER in .env}
-
             KC_DB_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
-
             KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:?Set KEYCLOAK_ADMIN in .env}
-
             KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?Set KEYCLOAK_ADMIN_PASSWORD in .env}
 
         ports:
@@ -72,13 +65,16 @@ services:
         image: redis:8-alpine
         container_name: jobflow-redis
         restart: unless-stopped
+
         ports:
             - "6379:6379"
+
         healthcheck:
-            test: ["CMD", "redis-cli ping"]
+            test: ["CMD", "redis-cli", "ping"]
             interval: 10s
             timeout: 5s
             retries: 10
+
         networks:
             - jobflow-network
 
@@ -86,19 +82,80 @@ services:
         image: rabbitmq:3-management-alpine
         container_name: jobflow-rabbitmq
         restart: unless-stopped
+
+        environment:
+            RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-jobflow}
+            RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-jobflow-local-rabbitmq-password}
+
         ports:
             - "5672:5672"
             - "15672:15672"
+
         healthcheck:
             test: ["CMD", "rabbitmq-diagnostics", "status"]
             interval: 10s
             timeout: 5s
             retries: 10
+
+        networks:
+            - jobflow-network
+
+    mongodb:
+        image: mongo:7.0
+        container_name: jobflow-mongodb
+        restart: unless-stopped
+
+        ports:
+            - "27017:27017"
+
+        volumes:
+            - mongodb-data:/data/db
+
+        healthcheck:
+            test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+            interval: 10s
+            timeout: 5s
+            retries: 10
+
+        networks:
+            - jobflow-network
+
+    elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.11.2
+        container_name: jobflow-elasticsearch
+        restart: unless-stopped
+
+        environment:
+            discovery.type: single-node
+            xpack.security.enabled: "false"
+            ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+
+        ports:
+            - "9200:9200"
+
+        volumes:
+            - elasticsearch-data:/usr/share/elasticsearch/data
+
+        healthcheck:
+            test:
+                - CMD-SHELL
+                - curl -fsS http://localhost:9200/_cluster/health || exit 1
+            interval: 10s
+            timeout: 5s
+            retries: 12
+
         networks:
             - jobflow-network
 
 volumes:
     postgres-data:
+        name: jobflow-postgres-data
+
+    mongodb-data:
+        name: jobflow-mongodb-data
+
+    elasticsearch-data:
+        name: jobflow-elasticsearch-data
 
 networks:
     jobflow-network:
