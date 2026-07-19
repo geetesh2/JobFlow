@@ -21,7 +21,7 @@ public class InMemoryIdempotencyServiceTests
     {
         // Arrange
         var key = "test-key";
-        _cacheMock.Setup(c => c.GetAsync(key, default)).ReturnsAsync((byte[])null);
+        _cacheMock.Setup(c => c.GetAsync(key, default)).ReturnsAsync((byte[]?)null);
 
         // Act
         var result = await _service.TryAcquireKeyAsync(key, TimeSpan.FromMinutes(1));

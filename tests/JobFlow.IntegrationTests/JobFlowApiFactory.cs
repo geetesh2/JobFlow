@@ -65,7 +65,7 @@ public sealed class JobFlowApiFactory : WebApplicationFactory<Program>
                     }
                 }
 
-                var dict = new Dictionary<string, string>
+                var dict = new Dictionary<string, string?>
                 {
                     ["MongoDb:ConnectionString"] = mongoConn,
                     ["MongoDb:Database"] = "jobflow",
@@ -75,7 +75,7 @@ public sealed class JobFlowApiFactory : WebApplicationFactory<Program>
                     ["Test:SkipExternalInitializers"] = _skipExternalInitializers.ToString()
                 };
 
-                config.AddInMemoryCollection(dict);
+                config.AddInMemoryCollection(dict!);
         });
 
         builder.ConfigureServices(services =>
@@ -148,9 +148,8 @@ public sealed class TestAuthenticationHandler : AuthenticationHandler<Authentica
     public TestAuthenticationHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger,
-        UrlEncoder encoder,
-        ISystemClock clock)
-        : base(options, logger, encoder, clock)
+        UrlEncoder encoder)
+        : base(options, logger, encoder)
     {
     }
 
