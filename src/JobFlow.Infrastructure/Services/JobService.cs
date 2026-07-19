@@ -68,7 +68,8 @@ public sealed class JobService : IJobService
             job.Id,
             job.Name,
             job.CreatedAtUtc,
-            Guid.NewGuid().ToString("N"));
+            Guid.NewGuid().ToString("N"),
+            System.Diagnostics.Activity.Current?.Id);
 
         await _jobPublisher.PublishJobCreatedAsync(message, cancellationToken);
 

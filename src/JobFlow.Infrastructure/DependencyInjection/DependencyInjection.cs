@@ -110,6 +110,7 @@ public static class DependencyInjection
                 tracing.AddAspNetCoreInstrumentation()
                        .AddHttpClientInstrumentation()
                        .AddEntityFrameworkCoreInstrumentation()
+                       .AddSource("JobFlow.Worker")
                        .AddOtlpExporter();
             })
             .WithMetrics(metrics =>

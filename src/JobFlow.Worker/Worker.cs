@@ -42,6 +42,10 @@ public class Worker : BackgroundService
 
     private async Task HandleMessageAsync(BasicDeliverEventArgs message, CancellationToken cancellationToken)
     {
+        var headers = message.BasicProperties.Headers;
+        var traceId = headers != null && headers.TryGetValue("TraceId", out var t) ? t?.ToString() : null;
+        using var activity = new System.Diagnostics.ActivitySource("JobFlow.Worker").StartActivity("ProcessJob", System.Diagnostics.ActivityKind.Consumer, traceId);
+
         try
         {
             var body = message.Body.ToArray();

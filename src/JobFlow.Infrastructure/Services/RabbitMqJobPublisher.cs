@@ -31,7 +31,8 @@ public sealed class RabbitMqJobPublisher : IJobPublisher
             properties.Persistent = true;
             properties.Headers = new Dictionary<string, object?>
             {
-                ["CorrelationId"] = message.CorrelationId
+                ["CorrelationId"] = message.CorrelationId,
+                ["TraceId"] = message.TraceId
             };
 
             await channel.BasicPublishAsync(
