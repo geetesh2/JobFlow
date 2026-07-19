@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option csharp_namespace = "JobFlow.Contracts.Grpc";
+
+package jobservice;
+
+service JobGrpcService {
+  rpc GetJobStatus (GetJobStatusRequest) returns (JobStatusResponse);
+}
+
+message GetJobStatusRequest {
+  string job_id = 1;
+}
+
+message JobStatusResponse {
+  string job_id = 1;
+  string status = 2;
+  string updated_at_utc = 3;
+}

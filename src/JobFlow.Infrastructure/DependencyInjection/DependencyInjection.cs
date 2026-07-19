@@ -110,8 +110,12 @@ public static class DependencyInjection
                 tracing.AddAspNetCoreInstrumentation()
                        .AddHttpClientInstrumentation()
                        .AddEntityFrameworkCoreInstrumentation()
+                       .AddRabbitMQInstrumentation()
                        .AddSource("JobFlow.Worker")
-                       .AddOtlpExporter();
+                       .AddOtlpExporter(options =>
+                       {
+                           options.Endpoint = new Uri(configuration.GetValue("Otlp:Endpoint", "http://localhost:4317")!);
+                       });
             })
             .WithMetrics(metrics =>
             {

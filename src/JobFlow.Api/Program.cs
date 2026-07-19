@@ -1,3 +1,4 @@
+using JobFlow.Api.Services;
 using JobFlow.Infrastructure.DependencyInjection;
 using JobFlow.Api.Authentication;
 using JobFlow.Api.Endpoints;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddGrpc();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -69,6 +71,7 @@ app.UseSwaggerUI(c =>
 
 app.UseHttpsRedirection();
 app.UseRateLimiter();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<IdempotencyMiddleware>();
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseAuthentication();
@@ -93,6 +96,7 @@ app.MapHealthChecks("/live", new HealthCheckOptions
 {
     Predicate = (_) => false // Only basic check if service is up, no dependencies
 });
+app.MapGrpcService<JobGrpcServiceImpl>();
 app.MapIdentityEndpoints();
 app.MapJobEndpoints();
 
