@@ -110,7 +110,6 @@ public static class DependencyInjection
                 tracing.AddAspNetCoreInstrumentation()
                        .AddHttpClientInstrumentation()
                        .AddEntityFrameworkCoreInstrumentation()
-                       .AddRabbitMQInstrumentation()
                        .AddSource("JobFlow.Worker")
                        .AddOtlpExporter(options =>
                        {

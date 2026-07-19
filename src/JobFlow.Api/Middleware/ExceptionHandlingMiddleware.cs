@@ -33,7 +33,7 @@ public class ExceptionHandlingMiddleware
     {
         var statusCode = exception switch
         {
-            KeyNotFoundException => HttpStatusCode.NotFound,
+            System.Collections.Generic.KeyNotFoundException => HttpStatusCode.NotFound,
             UnauthorizedAccessException => HttpStatusCode.Unauthorized,
             _ => HttpStatusCode.InternalServerError
         };
