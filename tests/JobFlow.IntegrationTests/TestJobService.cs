@@ -1,6 +1,5 @@
 using JobFlow.Application.Interfaces;
 using JobFlow.Application.DTOs;
-using JobFlow.Application.DTOs;
 
 namespace JobFlow.IntegrationTests;
 
@@ -25,6 +24,11 @@ public sealed class TestJobService : IJobService, ITestJobStore
     {
         _store.TryGetValue(id, out var resp);
         return Task.FromResult(resp);
+    }
+
+    public Task<IEnumerable<JobResponse>> GetAllJobsAsync(CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult((IEnumerable<JobResponse>)_store.Values.ToList());
     }
 
     public IReadOnlyCollection<JobResponse> GetAll() => _store.Values.ToList().AsReadOnly();

@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using JobFlow.Application.Abstractions.Persistence;
 using JobFlow.Application.DTOs;
@@ -5,6 +6,8 @@ using JobFlow.Application.Interfaces;
 using JobFlow.Contracts.Messages;
 using JobFlow.Domain.Entities;
 using Microsoft.Extensions.Logging;
+using Polly;
+using JobFlow.Infrastructure.Models;
 
 namespace JobFlow.Infrastructure.Services;
 
@@ -14,6 +17,7 @@ public sealed class JobService : IJobService
     private readonly IJobPublisher _jobPublisher;
     private readonly MongoJobSynchronizer _mongoJobSynchronizer;
     private readonly ElasticJobIndexer _elasticJobIndexer;
+    private readonly ResiliencePipeline _resiliencePipeline;
     private readonly ILogger<JobService> _logger;
 
     public JobService(
@@ -21,12 +25,14 @@ public sealed class JobService : IJobService
         IJobPublisher jobPublisher,
         MongoJobSynchronizer mongoJobSynchronizer,
         ElasticJobIndexer elasticJobIndexer,
+        ResiliencePipeline resiliencePipeline,
         ILogger<JobService> logger)
     {
         _dbContext = dbContext;
         _jobPublisher = jobPublisher;
         _mongoJobSynchronizer = mongoJobSynchronizer;
         _elasticJobIndexer = elasticJobIndexer;
+        _resiliencePipeline = resiliencePipeline;
         _logger = logger;
     }
 
@@ -41,8 +47,8 @@ public sealed class JobService : IJobService
 
         try
         {
-            await _mongoJobSynchronizer.UpsertJobAsync(job, payload, metadata, cancellationToken);
-            await _elasticJobIndexer.IndexJobAsync(new Infrastructure.Models.JobDocument
+            await _resiliencePipeline.ExecuteAsync(async ct => await _mongoJobSynchronizer.UpsertJobAsync(job, payload, metadata, ct), cancellationToken);
+            await _resiliencePipeline.ExecuteAsync(async ct => await _elasticJobIndexer.IndexJobAsync(new JobDocument
             {
                 Id = job.Id,
                 Name = job.Name,
@@ -51,7 +57,7 @@ public sealed class JobService : IJobService
                 UpdatedAtUtc = job.UpdatedAtUtc,
                 Payload = payload,
                 Metadata = metadata
-            }, cancellationToken);
+            }, ct), cancellationToken);
         }
         catch (Exception ex)
         {
@@ -73,5 +79,14 @@ public sealed class JobService : IJobService
     {
         var job = await _dbContext.Jobs.FindAsync(new object[] { id }, cancellationToken);
         return job is null ? null : new JobResponse(job.Id, job.Name, job.Status.ToString(), job.CreatedAtUtc, job.UpdatedAtUtc);
+    }
+
+    public async Task<IEnumerable<JobResponse>> GetAllJobsAsync(CancellationToken cancellationToken = default)
+    {
+        var jobs = await _dbContext.Jobs
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+
+        return jobs.Select(j => new JobResponse(j.Id, j.Name, j.Status.ToString(), j.CreatedAtUtc, j.UpdatedAtUtc));
     }
 }

@@ -1,4 +1,5 @@
 using JobFlow.Application.Abstractions.Persistence;
+using JobFlow.Application.Abstractions.Services;
 using JobFlow.Application.Interfaces;
 using JobFlow.Infrastructure.Persistence;
 using JobFlow.Infrastructure.Services;
@@ -9,6 +10,8 @@ using MongoDB.Driver;
 using Nest;
 using Npgsql;
 using RabbitMQ.Client;
+using Polly;
+using Polly.Retry;
 
 namespace JobFlow.Infrastructure.DependencyInjection;
 
@@ -18,6 +21,16 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        var resiliencePipeline = new ResiliencePipelineBuilder()
+            .AddRetry(new RetryStrategyOptions
+            {
+                MaxRetryAttempts = 3,
+                Delay = TimeSpan.FromSeconds(2),
+                BackoffType = DelayBackoffType.Constant
+            })
+            .Build();
+
+        services.AddSingleton(resiliencePipeline);
         var connectionString = configuration.GetConnectionString("JobFlowDb")
             ?? throw new InvalidOperationException("Connection string 'JobFlowDb' was not found.");
 
@@ -79,6 +92,7 @@ public static class DependencyInjection
         services.AddSingleton<IConnection>(_ => rabbitConnectionFactory.CreateConnectionAsync().GetAwaiter().GetResult());
         services.AddScoped<IJobPublisher, RabbitMqJobPublisher>();
         services.AddScoped<IJobService, JobService>();
+        services.AddScoped<IIdempotencyService, RedisIdempotencyService>();
 
         return services;
     }

@@ -1,6 +1,8 @@
 using JobFlow.Infrastructure.DependencyInjection;
 using JobFlow.Api.Authentication;
 using JobFlow.Api.Endpoints;
+using JobFlow.Api.Extensions;
+using JobFlow.Api.Middleware;
 using JobFlow.Infrastructure.Services;
 using Microsoft.OpenApi.Models;
 
@@ -37,6 +39,10 @@ builder.Services.AddSwaggerGen(options =>
 });
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddKeycloakAuthentication(builder.Configuration, builder.Environment);
+builder.Services.AddJobFlowRateLimiting(builder.Configuration);
+builder.Services
+    .AddGraphQLServer()
+    .AddQueryType<JobFlow.Api.GraphQL.JobQuery>();
 
 var app = builder.Build();
 
@@ -60,8 +66,12 @@ app.UseSwaggerUI(c =>
 });
 
 app.UseHttpsRedirection();
+app.UseRateLimiter();
+app.UseMiddleware<IdempotencyMiddleware>();
+app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapGraphQL();
 app.MapIdentityEndpoints();
 app.MapJobEndpoints();
 
