@@ -147,6 +147,33 @@ services:
         networks:
             - jobflow-network
 
+    jaeger:
+        image: jaegertracing/all-in-one:latest
+        container_name: jobflow-jaeger
+        ports:
+            - "16686:16686"
+            - "4317:4317"
+        networks:
+            - jobflow-network
+
+    prometheus:
+        image: prom/prometheus:latest
+        container_name: jobflow-prometheus
+        ports:
+            - "9090:9090"
+        volumes:
+            - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+        networks:
+            - jobflow-network
+
+    grafana:
+        image: grafana/grafana:latest
+        container_name: jobflow-grafana
+        ports:
+            - "3000:3000"
+        networks:
+            - jobflow-network
+
 volumes:
     postgres-data:
         name: jobflow-postgres-data

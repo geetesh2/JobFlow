@@ -1,3 +1,4 @@
+using JobFlow.Infrastructure.Services;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
@@ -97,7 +98,13 @@ public sealed class JobFlowApiFactory : WebApplicationFactory<Program>
             // Replace search service with test implementation to return in-memory jobs
             services.RemoveAll(typeof(JobFlow.Application.Interfaces.IJobSearchService));
             services.AddScoped<JobFlow.Application.Interfaces.IJobSearchService, TestJobSearchService>();
+
+            services.AddDistributedMemoryCache();
+            // Replaced RedisIdempotencyService with an in-memory implementation for testing
+            services.RemoveAll(typeof(JobFlow.Application.Abstractions.Services.IIdempotencyService));
+            services.AddSingleton<JobFlow.Application.Abstractions.Services.IIdempotencyService, JobFlow.Infrastructure.Services.InMemoryIdempotencyService>();
         });
+
     }
 
     private static void EnsureTestcontainersStarted()

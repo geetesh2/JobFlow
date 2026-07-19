@@ -5,6 +5,8 @@ using JobFlow.Api.Extensions;
 using JobFlow.Api.Middleware;
 using JobFlow.Infrastructure.Services;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -71,7 +73,26 @@ app.UseMiddleware<IdempotencyMiddleware>();
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseOpenTelemetryPrometheusScrapingEndpoint();
 app.MapGraphQL();
+
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    ResultStatusCodes =
+    {
+        [HealthStatus.Healthy] = StatusCodes.Status200OK,
+        [HealthStatus.Degraded] = StatusCodes.Status200OK,
+        [HealthStatus.Unhealthy] = StatusCodes.Status503ServiceUnavailable
+    }
+});
+app.MapHealthChecks("/ready", new HealthCheckOptions
+{
+    Predicate = (check) => true
+});
+app.MapHealthChecks("/live", new HealthCheckOptions
+{
+    Predicate = (_) => false // Only basic check if service is up, no dependencies
+});
 app.MapIdentityEndpoints();
 app.MapJobEndpoints();
 

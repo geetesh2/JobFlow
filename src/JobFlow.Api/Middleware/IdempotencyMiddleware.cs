@@ -6,21 +6,19 @@ namespace JobFlow.Api.Middleware;
 public class IdempotencyMiddleware
 {
     private readonly RequestDelegate _next;
-    private readonly IIdempotencyService _idempotencyService;
 
-    public IdempotencyMiddleware(RequestDelegate next, IIdempotencyService idempotencyService)
+    public IdempotencyMiddleware(RequestDelegate next)
     {
         _next = next;
-        _idempotencyService = idempotencyService;
     }
 
-    public async Task InvokeAsync(HttpContext context)
+    public async Task InvokeAsync(HttpContext context, IIdempotencyService idempotencyService)
     {
         if (context.Request.Headers.TryGetValue("Idempotency-Key", out var key))
         {
             var idempotencyKey = $"idempotency:{key}";
 
-            if (!await _idempotencyService.TryAcquireKeyAsync(idempotencyKey, TimeSpan.FromMinutes(10)))
+            if (!await idempotencyService.TryAcquireKeyAsync(idempotencyKey, TimeSpan.FromMinutes(10)))
             {
                 context.Response.StatusCode = StatusCodes.Status409Conflict;
                 await context.Response.WriteAsync("Request with this Idempotency-Key is currently being processed.");
@@ -35,7 +33,7 @@ public class IdempotencyMiddleware
             {
                 // In a real scenario, you'd only release if successful, or implement state management
                 // to distinguish between 'processing' and 'completed'.
-                await _idempotencyService.ReleaseKeyAsync(idempotencyKey);
+                await idempotencyService.ReleaseKeyAsync(idempotencyKey);
             }
         }
         else

@@ -1,24 +1,19 @@
-# Plan: Implement Polly Resilience and Correlation ID Middleware
+# Plan: Comprehensive Validation and Testing (Phases 1-5)
 
-## Objectives
-1. **Implement Correlation ID Middleware**:
-   - Create a middleware in `JobFlow.Api` to capture or generate `X-Correlation-ID`.
-   - Propagate this ID through the system (logs, headers).
-2. **Implement Polly Resilience**:
-   - Define standard resilience pipelines (retry/timeout) in `JobFlow.Infrastructure`.
-   - Wrap external service calls (MongoDB, Elasticsearch, RabbitMQ) using these policies.
+## Objective
+1. **Verification**: Manually and programmatically verify every component from Phases 1-5.
+2. **Testing**: Add missing critical unit and integration tests.
+3. **End-to-End Local Connectivity**: Bring up the Docker stack and confirm cross-service connectivity.
 
-## Implementation Details
-1. **Correlation ID**:
-   - Create `src/JobFlow.Api/Middleware/CorrelationIdMiddleware.cs`.
-   - Register it in `Program.cs`.
-   - Update Serilog logging enrichment.
-2. **Polly**:
-   - Add `Polly.Extensions` if necessary (or use standard Polly v8).
-   - Create a `ResiliencePipeline` builder in `DependencyInjection.cs`.
-   - Update `JobService` and `RabbitMqJobPublisher` to use the injected pipeline.
+## Verification Plan (Status: Completed)
+1. **Docker Stack Validation**: Completed.
+2. **Endpoint Validation**: Completed.
+3. **Integration Test Suite**: Completed.
+4. **Unit Test Audit**: Completed.
 
-## Verification
-- API receives/generates correlation IDs and logs them.
-- Service calls are wrapped in retry policies.
-- Build verifies successfully.
+## Deliverables
+- Fully running local development environment.
+- Verified healthy infrastructure.
+- High-coverage integration tests covering core business workflows.
+- Confirmed observability (logs, traces, metrics are flowing).
+- **Status**: All deliverables verified and completed.

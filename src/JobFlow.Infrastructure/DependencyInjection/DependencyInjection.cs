@@ -12,6 +12,9 @@ using Npgsql;
 using RabbitMQ.Client;
 using Polly;
 using Polly.Retry;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 namespace JobFlow.Infrastructure.DependencyInjection;
 
@@ -94,6 +97,28 @@ public static class DependencyInjection
         services.AddScoped<IJobService, JobService>();
         services.AddScoped<IIdempotencyService, RedisIdempotencyService>();
 
+        services.AddHealthChecks()
+            .AddNpgSql(connectionString)
+            .AddRedis(configuration.GetValue("Redis:Configuration", "localhost:6379")!)
+            .AddRabbitMQ(sp => sp.GetRequiredService<IConnection>())
+            .AddMongoDb(sp => sp.GetRequiredService<IMongoClient>())
+            .AddElasticsearch(configuration.GetValue("Elasticsearch:Url", "http://localhost:9200")!);
+
+        services.AddOpenTelemetry()
+            .WithTracing(tracing =>
+            {
+                tracing.AddAspNetCoreInstrumentation()
+                       .AddHttpClientInstrumentation()
+                       .AddEntityFrameworkCoreInstrumentation()
+                       .AddOtlpExporter();
+            })
+            .WithMetrics(metrics =>
+            {
+                metrics.AddAspNetCoreInstrumentation()
+                       .AddPrometheusExporter();
+            });
+
         return services;
     }
 }
+
