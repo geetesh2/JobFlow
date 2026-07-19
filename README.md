@@ -35,17 +35,15 @@ Key modules:
 - `src/JobFlow.Api/Endpoints/JobEndpoints.cs` - job endpoints and search signature
 - `tests/JobFlow.IntegrationTests/JobFlowApiFactory.cs` - test host customization (Testcontainers fallback and DI overrides)
 
-## Current Status (as of 2026-07-18)
+## Current Status (as of 2026-07-19)
 
 - Solution builds successfully.
-- Search integration pipeline implemented: MongoDB document model, Mongo indexes, Elasticsearch index initializer, and an Elastic-based search service exist.
-- Integration tests have been set up, but the environment previously blocked Docker so Testcontainers couldn't run reliably.
-- To make tests robust without Docker, the test host (`JobFlowApiFactory`) now provides fallbacks/mocks:
-    - `TestJobService` (in-memory) replaces `IJobService` during tests.
-    - `TestJobSearchService` (in-memory-backed) replaces `IJobSearchService` during tests.
-    - `TestJobPublisher` replaces RabbitMQ publisher during tests.
-    - `Test:SkipExternalInitializers` config flag prevents index initializers from attempting to reach external services when tests run without containers.
-- Integration tests currently pass locally in the repository after those test doubles and wiring were added.
+- Phase 1-5 verification completed, including:
+    - Infrastructure stack (Postgres, MongoDB, Elasticsearch, RabbitMQ) successfully validated.
+    - Endpoints operational and tested.
+    - Full integration test suite passing with fallback support.
+    - Observability (OpenTelemetry) configured and active.
+- Current active work: `feature/phase-4-job-execution`.
 
 ## How Tests Work (notes)
 
