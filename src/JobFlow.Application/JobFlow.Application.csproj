@@ -1,11 +1,16 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <ProjectReference Include="..\JobFlow.Domain\JobFlow.Domain.csproj" />
+    <ProjectReference Include="..\JobFlow.Contracts\JobFlow.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentValidation.AspNetCore" />
+    <PackageReference Include="HotChocolate.Data" />
+    <PackageReference Include="MediatR" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Polly" />
   </ItemGroup>
 
   <PropertyGroup>

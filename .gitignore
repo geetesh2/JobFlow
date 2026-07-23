@@ -27,5 +27,17 @@ TestResults/
 # Coverage
 coverage/
 
+# Worker output (resized images, generated PDFs)
+output/
+
+# Load test results
+tests/load/results.json
+
 # macOS
 .DS_Store
+
+# Misc
+litellm_config.yaml
+jobflow-build-prompt.md
+solution
+plan.md

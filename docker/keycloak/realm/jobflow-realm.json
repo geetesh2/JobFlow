@@ -1,0 +1,58 @@
+{
+    "realm": "jobflow",
+    "enabled": true,
+    "displayName": "JobFlow",
+    "roles": {
+        "realm": [
+            { "name": "jobflow-user", "description": "Base JobFlow user role" },
+            {
+                "name": "jobflow-admin",
+                "description": "JobFlow administrator role"
+            }
+        ]
+    },
+    "clients": [
+        {
+            "clientId": "jobflow-api",
+            "name": "JobFlow API",
+            "enabled": true,
+            "protocol": "openid-connect",
+            "publicClient": true,
+            "standardFlowEnabled": true,
+            "directAccessGrantsEnabled": true,
+            "serviceAccountsEnabled": false,
+            "redirectUris": ["http://localhost:*"],
+            "webOrigins": ["http://localhost:*"],
+            "protocolMappers": [
+                {
+                    "name": "jobflow-api-audience",
+                    "protocol": "openid-connect",
+                    "protocolMapper": "oidc-audience-mapper",
+                    "consentRequired": false,
+                    "config": {
+                        "included.client.audience": "jobflow-api",
+                        "access.token.claim": "true",
+                        "id.token.claim": "true"
+                    }
+                }
+            ]
+        }
+    ],
+    "users": [
+        {
+            "username": "demo",
+            "enabled": true,
+            "email": "demo@example.com",
+            "firstName": "Demo",
+            "lastName": "User",
+            "credentials": [
+                {
+                    "type": "password",
+                    "value": "demo123",
+                    "temporary": false
+                }
+            ],
+            "realmRoles": ["jobflow-user"]
+        }
+    ]
+}

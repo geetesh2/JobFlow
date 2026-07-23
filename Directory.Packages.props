@@ -1,41 +1,68 @@
 <Project>
-
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
-
   <ItemGroup>
-
     <!-- EF Core -->
+    <PackageVersion Include="HotChocolate.AspNetCore" Version="16.5.0" />
+    <PackageVersion Include="HotChocolate.Data" Version="16.5.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.1" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.1" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
-
     <!-- ASP.NET -->
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.1" />
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.1" />
-
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.1" />
+    <PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="9.0.1" />
     <!-- Worker -->
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.1" />
-
     <!-- Swagger -->
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="7.3.1" />
-
     <!-- Validation -->
     <PackageVersion Include="FluentValidation.AspNetCore" Version="11.3.1" />
-
     <!-- MediatR -->
     <PackageVersion Include="MediatR" Version="13.1.0" />
-
     <!-- Logging -->
     <PackageVersion Include="Serilog.AspNetCore" Version="9.0.0" />
-
+    <PackageVersion Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageVersion Include="Serilog.Sinks.Elasticsearch" Version="10.0.0" />
+    <!-- Distributed Systems -->
+    <PackageVersion Include="RabbitMQ.Client" Version="7.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.0" />
+    <PackageVersion Include="StackExchange.Redis" Version="3.0.0" />
+    <PackageVersion Include="Polly" Version="8.1.0" />
+    <PackageVersion Include="MongoDB.Driver" Version="3.0.0" />
+    <PackageVersion Include="Nest" Version="7.17.5" />
     <!-- Testing -->
+    <PackageVersion Include="FluentAssertions" Version="8.0.1" />
+    <PackageVersion Include="Moq" Version="4.20.72" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.2" />
-
+    <PackageVersion Include="DotNet.Testcontainers" Version="1.7.0-beta.2269" />
+    <!-- Image Processing -->
+    <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.7" />
+    <!-- PDF Generation -->
+    <PackageVersion Include="QuestPDF" Version="2024.12.2" />
+    <!-- gRPC -->
+    <PackageVersion Include="Grpc.Net.Client" Version="2.67.0" />
+    <PackageVersion Include="Google.Protobuf" Version="3.30.0" />
+    <PackageVersion Include="Grpc.Tools" Version="2.69.0" />
+    <PackageVersion Include="Grpc.AspNetCore" Version="2.67.0" />
+    <!-- Health Checks -->
+    <PackageVersion Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
+    <PackageVersion Include="AspNetCore.HealthChecks.Redis" Version="9.0.0" />
+    <PackageVersion Include="AspNetCore.HealthChecks.RabbitMQ" Version="9.0.0" />
+    <PackageVersion Include="AspNetCore.HealthChecks.MongoDb" Version="9.0.0" />
+    <PackageVersion Include="AspNetCore.HealthChecks.Elasticsearch" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="9.0.1" />
+    <!-- OpenTelemetry -->
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.11.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.11.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.11.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.0.0-beta.12" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.15.3" />
+    <PackageVersion Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.11.0-beta.1" />
   </ItemGroup>
-
 </Project>

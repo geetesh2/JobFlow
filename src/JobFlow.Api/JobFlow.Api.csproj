@@ -4,15 +4,23 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-JobFlow.Api-57ee49ce-0379-46ab-a2f2-64ad5ab664d1</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="HotChocolate.AspNetCore" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Serilog.AspNetCore" />
+    <PackageReference Include="Swashbuckle.AspNetCore" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\JobFlow.Application\JobFlow.Application.csproj" />
     <ProjectReference Include="..\JobFlow.Infrastructure\JobFlow.Infrastructure.csproj" />
+    <ProjectReference Include="..\JobFlow.Contracts\JobFlow.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

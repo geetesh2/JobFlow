@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option csharp_namespace = "JobFlow.Shared.Grpc";
+
+package job;
+
+service JobControl {
+  rpc UpdateJobStatus (JobStatusRequest) returns (JobStatusResponse);
+}
+
+message JobStatusRequest {
+  string job_id = 1;
+  string status = 2;
+}
+
+message JobStatusResponse {
+  bool success = 1;
+  string message = 2;
+}

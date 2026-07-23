@@ -1,0 +1,218 @@
+{
+  "info": {
+    "name": "JobFlow API",
+    "description": "Complete collection for testing JobFlow API endpoints. Run in sequence:\n1. Get Token (auto-sets Bearer token for subsequent requests)\n2. Health Checks\n3. Create Jobs (DogApi, ImageResize, PdfReport)\n4. Query Jobs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5274",
+      "type": "string"
+    },
+    {
+      "key": "keycloakUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Auth - Get Bearer Token",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "pm.collectionVariables.set('token', jsonData.access_token);",
+              "pm.environment.set('token', jsonData.access_token);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            { "key": "client_id", "value": "jobflow-api", "type": "text" },
+            { "key": "username", "value": "demo", "type": "text" },
+            { "key": "password", "value": "demo123", "type": "text" },
+            { "key": "grant_type", "value": "password", "type": "text" }
+          ]
+        },
+        "url": {
+          "raw": "{{keycloakUrl}}/realms/jobflow/protocol/openid-connect/token",
+          "host": ["{{keycloakUrl}}"],
+          "path": ["realms", "jobflow", "protocol", "openid-connect", "token"]
+        }
+      }
+    },
+    {
+      "name": "2. Health - Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"]
+        }
+      }
+    },
+    {
+      "name": "2. Health - Readiness Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/ready",
+          "host": ["{{baseUrl}}"],
+          "path": ["ready"]
+        }
+      }
+    },
+    {
+      "name": "2. Health - Liveness Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/live",
+          "host": ["{{baseUrl}}"],
+          "path": ["live"]
+        }
+      }
+    },
+    {
+      "name": "3. Jobs - Create DogApi Job",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"DogApi\",\n  \"priority\": \"Normal\",\n  \"payload\": {\n    \"test\": true\n  },\n  \"maxRetries\": 1\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/jobs",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "jobs"]
+        }
+      }
+    },
+    {
+      "name": "3. Jobs - Create ImageResize Job",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"ImageResize\",\n  \"priority\": \"Normal\",\n  \"payload\": {\n    \"url\": \"https://picsum.photos/200/300\",\n    \"width\": 200,\n    \"height\": 200,\n    \"format\": \"png\"\n  },\n  \"maxRetries\": 1\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/jobs",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "jobs"]
+        }
+      }
+    },
+    {
+      "name": "3. Jobs - Create PdfReport Job",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"PdfReport\",\n  \"priority\": \"Normal\",\n  \"payload\": {\n    \"title\": \"JobFlow System Report\",\n    \"status\": \"Completed\",\n    \"maxRows\": 20\n  },\n  \"maxRetries\": 1\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/jobs",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "jobs"]
+        }
+      }
+    },
+    {
+      "name": "4. Jobs - Get Job By ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/jobs/{{jobId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "jobs", "{{jobId}}"]
+        }
+      }
+    },
+    {
+      "name": "4. Jobs - Search Jobs",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/jobs?query=&status=Completed&page=1&pageSize=20&sortBy=CreatedAtUtc&sortOrder=desc",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "jobs"],
+          "query": [
+            { "key": "query", "value": "", "description": "Full-text search query" },
+            { "key": "status", "value": "Completed", "description": "Filter by status: Pending, Processing, Completed, Failed" },
+            { "key": "page", "value": "1" },
+            { "key": "pageSize", "value": "20" },
+            { "key": "sortBy", "value": "CreatedAtUtc" },
+            { "key": "sortOrder", "value": "desc" }
+          ]
+        }
+      }
+    }
+  ]
+}

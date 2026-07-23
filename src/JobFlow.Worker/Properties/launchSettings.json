@@ -4,6 +4,7 @@
     "JobFlow.Worker": {
       "commandName": "Project",
       "dotnetRunMessages": true,
+      "applicationUrl": "http://localhost:5275",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }
